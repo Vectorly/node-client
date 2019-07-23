@@ -1,0 +1,17 @@
+{
+  "name": "vectorly-client",
+  "version": "0.0.1",
+  "description": "Node library for uploading, compressing and streaming videos using Vectorly's stream product",
+  "main": "index.js",
+  "scripts": {
+    "test": "cd tests && node test"
+  },
+  "author": "Sam Bhattacharyya",
+  "license": "MIT",
+  "dependencies": {
+    "download": "^7.1.0",
+    "jwt-simple": "^0.5.6",
+    "request": "^2.88.0",
+    "tus-js-client": "^1.8.0-1"
+  }
+}
