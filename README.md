@@ -12,7 +12,7 @@ Vectorly's Node library enables provides a Node wrapper for the API, enabling yo
 
 To use the library, you will need an API Key. 
 
-    const vectorly = require('@vectorly/vectorly-client')(process.env.VECTORLY_API_KEY);
+    const vectorly = require('@vectorly-io/client')(process.env.VECTORLY_API_KEY);
         
 You can get your API key in the "Settings page", which you can view by clicking on the user icon in the top-right hand corner. 
 
