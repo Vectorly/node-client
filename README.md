@@ -46,6 +46,34 @@ You can get your API key in the "Settings page", which you can view by clicking 
     });
 
 
+## Listing files
+
+    vectorly.list(function (err, videos) {
+    
+        if(err) return console.log("An error ocurred while  listing videos");
+    
+        console.log("Got videos");
+        console.log(videos);
+    });
+
+
+## Downloading files
+
+    let video_id = '123';
+    
+    let options = {
+        silent: false,
+        destination: 'myvideo.mp4'
+    }; 
+    
+    vectorly.download(video_id, options, function (err) {
+    
+        if(err) return console.log("An error ocurred while  listing videos");
+    
+        console.log("Your video finished downloading");
+    });
+
+
 ## Security
 
 To authorize an individual user to watch a specific video, you can create temporary, unique signed URLs, that will enable the video to only be viewed for a short amount of time.
@@ -59,14 +87,5 @@ To authorize an individual user to watch a specific video, you can create tempor
     `);
 
 
-## Listing files
-In progress
-   
-
-
-## Downloading files
-
-In progress
-   
    
    
