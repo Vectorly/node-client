@@ -1,16 +1,35 @@
 
 const request  = require('request');
 
-const auth = require('./auth');
-const fs = require('fs');
-
-
 module.exports = function (api_key) {
 
     return function list(callback) {
 
-        //TO DO
-        // No way to get current list of videos from API Key
+        request({
+            headers: {
+                'x-api-key': api_key
+            },
+            uri: 'https://api.vectorly.io/videos/list',
+            method: 'GET'
+        }, function (err, res, body) {
+
+            if(err) return callback(err);
+
+
+            let videos = [];
+
+            try{
+                videos = JSON.parse(body);
+                return callback(null, videos);
+
+
+            } catch (e) {
+
+                return callback(e);
+
+            }
+
+        });
 
 
     }

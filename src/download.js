@@ -1,36 +1,56 @@
 const request  = require('request');
-
-const auth = require('./auth');
 const fs = require('fs');
 
+const filesize = require('filesize');
 
 module.exports = function (api_key) {
 
-    return function download(video_id, callback) {
-
-        console.log("Downloading video");
-        console.log(video_id);
-
-        let token = auth(api_key)(video_id, 30);  //30 minute download ability
-
-        let url = `https://api.vectorly.io/file/v1/video/${video_id}/filename/video%2Fvideo.mp4/token/${token.token}`;  // This doesn't work for some reason
-
-        fs.writeFileSync('test.txt', url);
-
-        let download =  request.get(url);
-
-        let dest = fs.createWriteStream(`${video_id}.mp4`);
+    return function download(video_id, options, callback) {
 
 
-        console.log(url);
+        let total  = 0;
+        let progress = 0;
+
+        let destination_name = options.destination || `${video_id}.mp4`;
+
+        let dest = fs.createWriteStream(destination_name);
+
+        let download = request({
+            headers: {
+                'x-api-key': api_key
+            },
+            uri: `https://api.vectorly.io/videos/download/${video_id}`,
+            method: 'GET'
+        });
+
+        download.on( 'response', function ( data ) {
+            total = data.headers[ 'content-length' ];
+        });
+
+
+        download.on('data', function (chunk) {
+            progress += chunk.length;
+
+            if(!options.silent){
+
+                process.stdout.write(`Downloading ${destination_name}: ${filesize(progress)}/${filesize(total)} \r`);
+
+            }
+        });
+
+
         download.pipe(dest);
+
 
         if(callback){
             download.on('error', callback);
             download.on('end', function (res) {
 
-                console.log(res);
-               callback(null, video_id);
+                if(!options.silent){
+                    console.log(`\nFinished download ${destination_name}`);
+                }
+
+               callback(null, destination_name);
             });
         }
 
