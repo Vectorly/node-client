@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Vectorly embedded video</title>
+    <link rel="icon" href="img/vectorly-favicon.png" />
+    <style type="text/css">
+        ::-webkit-media-controls {
+            display:none !important;
+        }
+
+        #container{
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            max-width: 100%;
+            max-height: 100%;
+            transform: translate(-50%, -50%);
+            -webkit-transform: translate(-50%, -50%);
+        }
+
+        #loader{
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            -webkit-transform: translate(-50%, -50%);
+        }
+
+        #error-container{
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            max-width: 100%;
+            max-height: 100%;
+            transform: translate(-50%, -50%);
+            -webkit-transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        #error-img{
+            display: block;
+            position: relative;
+            margin: auto;
+            margin-top: 100px;
+
+        }
+
+        #error-message{
+            font-family: Helvetica, sans-serif;
+            text-align: center;
+            color: #888888;
+            width: 350px;
+            font-size: 20px;
+            margin: auto;
+        }
+
+        body{
+            overflow: hidden;
+        }
+
+
+        #report-error{
+            border-radius: 8px;
+            background-color: #4a86e8;
+            color: white;
+            padding: 10px 20px;
+            font-size: 14px;
+            margin: auto;
+            display: block;
+            position: relative;
+            margin-top: 20px;
+            border-style: none;
+            cursor: pointer;
+
+        }
+
+    </style>
+
+    <!-- start Mixpanel -->
+
+    <script type="text/javascript">(function(c,a){if(!a.__SV){var b=window;try{var d,m,j,k=b.location,f=k.hash;d=function(a,b){return(m=a.match(RegExp(b+"=([^&]*)")))?m[1]:null};f&&d(f,"state")&&(j=JSON.parse(decodeURIComponent(d(f,"state"))),"mpeditor"===j.action&&(b.sessionStorage.setItem("_mpcehash",f),history.replaceState(j.desiredHash||"",c.title,k.pathname+k.search)))}catch(n){}var l,h;window.mixpanel=a;a._i=[];a.init=function(b,d,g){function c(b,i){var a=i.split(".");2==a.length&&(b=b[a[0]],i=a[1]);b[i]=function(){b.push([i].concat(Array.prototype.slice.call(arguments,
+        0)))}}var e=a;"undefined"!==typeof g?e=a[g]=[]:g="mixpanel";e.people=e.people||[];e.toString=function(b){var a="mixpanel";"mixpanel"!==g&&(a+="."+g);b||(a+=" (stub)");return a};e.people.toString=function(){return e.toString(1)+".people (stub)"};l="disable time_event track track_pageview track_links track_forms track_with_groups add_group set_group remove_group register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user people.remove".split(" ");
+        for(h=0;h<l.length;h++)c(e,l[h]);var f="set set_once union unset remove delete".split(" ");e.get_group=function(){function a(c){b[c]=function(){call2_args=arguments;call2=[c].concat(Array.prototype.slice.call(call2_args,0));e.push([d,call2])}}for(var b={},d=["get_group"].concat(Array.prototype.slice.call(arguments,0)),c=0;c<f.length;c++)a(f[c]);return b};a._i.push([b,d,g])};a.__SV=1.2;b=c.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?
+        MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn4.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn4.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn4.mxpnl.com/libs/mixpanel-2-latest.min.js";d=c.getElementsByTagName("script")[0];d.parentNode.insertBefore(b,d)}})(document,window.mixpanel||[]);
+    mixpanel.init("14e21b22b3a4116cc5af236182ec95b1");</script>
+    <!-- end Mixpanel -->
+
+
+
+
+    <script src="vv.js"></script>
+</head>
+<body>
+
+<div id="container">
+    <img  src="img/loader.gif" id="loader">
+</div>
+
+
+<div id="error-container">
+    <img src="img/missing-video.svg" width="200"  id="error-img" />
+    <div id="error-message">
+
+        There was an error loading the video
+        <!--[if lte IE 10]>
+        Please update to the latest version of Internet explorer to watch this video.
+        <![endif]-->
+
+
+    </div>
+
+
+    <input type="button" id="report-error" value="Let us know if something is wrong" onclick="reportError()">
+</div>
+
+</body>
+
+<script>
+
+
+    window.unsentMessages = [];
+    window.captureMessage = function (message) {
+        if ("Sentry" in window) {
+            var event_id = Sentry.captureException(message)
+        } else {
+            window.unsentMessages.push(message);
+            console.log('Pushing', message);
+        }
+    };
+
+    var params = getParams();
+
+    // var height = params.height || window.innerHeight/1.144;
+    // var width = params.width || window.innerWidth;
+
+    // if(width > (16/9)*height) width = height*16/9;
+    // else height = width*9/16;
+
+
+    var autoplay = false;
+    if(params.autoplay &&(params.autoplay === 'true')) autoplay = true;
+
+    // var container = document.getElementById('container');
+    // container.style.top = window.innerHeight*0.5 -  height*0.5*1.144 + "px";
+    // container.style.left = window.innerWidth*0.5 -  width*0.5 + "px";
+
+    function getParams() {
+
+        var params = {};
+
+        var keys = ['video', 'height', 'width', 'autoplay', 'quality', 'version', 'token', 'volume'];
+
+        var args  = location.href.split('/');
+
+        params.staging = null;
+        params.demo = null;
+
+        if(args.indexOf('embed-staging') !== -1) params.staging = true;
+        if(args.indexOf('embed-demo') !== -1) params.demo = true;
+
+
+        keys.forEach(function (key) {
+
+            var index =  args.indexOf(key);
+
+            if((index < 0) || (index >= (args.length -1))) return null;
+
+            params[key] = args[index+1];
+
+        });
+
+        return params;
+    }
+
+    if(!params.video) {
+        onError("We couldn't find the video you are looking for");
+        //   window.captureMessage(new Error("Video loaded without params"));
+    }
+    else loadVideo();
+
+
+    function loadVideo() {
+
+        var error_timeout = setTimeout(function () {
+
+            if(document.getElementById("video")) return null; // The video loaded, but the controls interface didn't play
+
+            onError();
+
+            // window.captureMessage(new Error("Time out loading the video, url was: " + location.href));
+            onError("Sorry, we couldn't find that video. The creator may have made it private.");
+
+        }, 5000);
+
+
+        var video = document.createElement("video");
+        video.src = "s3://" +  params.video;
+        video.preload = "none";
+        video.style.display ="none";
+        video.type = "video/lrn";
+        video.setAttribute("type", "video/lrn");
+
+        video.id = "video-container";
+        video.setAttribute("webkit-playsinline", "true");
+
+        if(params.width)  video.setAttribute("width", params.width);
+        if(params.height) video.setAttribute("height", params.height);
+
+        if(params.port) {
+            video.setAttribute("x-api-host", "http://localhost:" + params.port);
+        } else{
+            video.setAttribute("x-api-host", "http://localhost:8080");
+        }
+
+
+        video.onload = function (controls) {
+            clearTimeout(error_timeout);
+            if(params.volume) controls.setVolume(Number(params.volume));
+
+            controls.onPlay(function () {
+                mixpanel.track("video-play");
+            });
+
+        };
+
+        container.appendChild(video);
+
+    }
+
+
+    function reportError(error_message) {
+
+        error_message = error_message || "";
+
+        document.getElementById("report-error").disabled = true; // De-duplication
+        setTimeout( function() { document.getElementById("report-error").disabled = false }, 2000);
+
+        if (Sentry) {
+            var event_id = Sentry.captureException(error_message);
+            Sentry.showReportDialog({eventId: event_id});
+        } else {
+            console.error("Sentry not yet loaded while showing report dialog");
+            window.captureMessage(new Error("Sentry not yet loaded while showing report dialog, trying again in 2 s"));
+        }
+
+    }
+
+    function onError(message) {
+
+        document.getElementById("container").style.display = "none";
+        document.getElementById("error-container").style.display = "block";
+
+        if(message) document.getElementById("error-message").innerText = message;
+
+    }
+
+
+
+
+
+</script>
+
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-134514531-2"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-134514531-2');
+</script>
+
+
+<script src="https://browser.sentry-cdn.com/4.6.2/bundle.min.js" crossorigin="anonymous"></script>
+<script>
+    // console.log('Loaded Sentry')
+    Sentry.init({ dsn: 'https://e2e5c12e2ba14ddda372a27ec15e00c1@sentry.io/1399232', attachStacktrace: true });
+    // console.log('unsent', window.unsentMessages)
+
+
+    window.unsentMessages.forEach(function (msg) {
+        // console.log('Capturing', msg, Sentry)
+        Sentry.captureException(msg)
+    })
+
+</script>
+<script src="//rum-static.pingdom.net/pa-5c6e01a11872b500160006b1.js" async></script>
+
+
+</html>
+

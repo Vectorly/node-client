@@ -4,12 +4,16 @@ const filesize = require('filesize');
 
 const request  = require('request');
 
-const fs = require('fs');
+const fs = require('fs-extra');
+
+const auth =  require('./auth');
 
 module.exports = function (api_key) {
 
-    return function sync(folder, options, callback, onprogress) {
+    return function sync(options, callback, onprogress) {
 
+
+        let folder = process.env.VECTORLY_LOCAL_FOLDER || options.folder || 'vectorly_files';
 
         let video_list = [];
         let videos_to_download = [];
@@ -20,7 +24,7 @@ module.exports = function (api_key) {
         let bytes_downloaded = 0;
 
 
-        async.series([getVideoList, getTotalToDownload, downloadAll], callback);
+        async.series([getVideoList, getTotalToDownload, downloadAll, fetchingManifests], callback);
 
 
         function getVideoList(then) {
@@ -34,6 +38,8 @@ module.exports = function (api_key) {
                 list(function (err, videos) {
 
                     if (err) return then(err);
+
+                    fs.writeJsonSync(`${folder}/videos.json`, videos);
 
                     video_list = videos.map(video => video.id);
 
@@ -57,7 +63,6 @@ module.exports = function (api_key) {
 
             console.log(`There are ${total_files_to_download} videos to download`);
             console.log("Gathering download meta data...");
-
 
 
             async.each(video_list, function (video_id, next) {
@@ -120,6 +125,44 @@ module.exports = function (api_key) {
                 });
 
 
+                download.on('error', function (err) {
+
+                    if(err.code === 'ENOTFOUND') return  next("Cannot sync right now, not connected to the internet");
+                    else return next(err);
+
+                });
+
+
+            }, cb);
+
+        }
+
+        function fetchingManifests(cb) {
+
+
+            console.log("\nUpdating meta data");
+
+            async.eachLimit(videos_to_download, 20, function (video_id, next) {
+
+
+                let download = request({
+                    headers: {
+                        'x-api-key': api_key
+                    },
+                    uri: `https://api.vectorly.io/videos/metadata/${video_id}`,
+                    method: 'GET'
+                });
+
+
+                let destination = `${folder}/${video_id}.json`;
+
+                let dest = fs.createWriteStream(destination);
+
+                download.on('end', next);
+
+                download.pipe(dest);
+
+
             }, cb);
 
         }
@@ -136,9 +179,6 @@ module.exports = function (api_key) {
                 console.log(`${videos_skipped.length} videos already up to date`);
                 console.log(`There are ${filesize(total_bytes_to_download)} bytes of video to download`);
             }
-
-
-
 
 
             async.eachLimit(videos_to_download, options.concurrency || 5, function (video_id, next) {
