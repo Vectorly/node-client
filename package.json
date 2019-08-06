@@ -9,6 +9,7 @@
   "author": "Sam Bhattacharyya",
   "license": "MIT",
   "dependencies": {
+    "async": "^3.1.0",
     "download": "^7.1.0",
     "filesize": "^4.1.2",
     "jwt-simple": "^0.5.6",
