@@ -3,6 +3,9 @@
  */
 
 const fs = require('fs-extra');
+const serveStatic = require('serve-static');
+const path = require('path');
+
 
 module.exports = {
 
@@ -22,8 +25,9 @@ module.exports = {
         });
 
 
+        console.log(__dirname);
 
-        app.use('/embed', express.static('embed'));
+        app.use('/embed', serveStatic(path.join(__dirname, 'embed')));
 
         app.get('/file/v1/video/:video_id/filename/vvid.json', function (req, res) {
 
