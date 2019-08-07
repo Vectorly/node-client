@@ -27,18 +27,18 @@ module.exports = {
 
         app.get('/file/v1/video/:video_id/filename/vvid.json', function (req, res) {
 
-            res.sendFile(`${options.folder}/${req.params.video_id}.json`,  { root : __dirname});
+            res.sendFile(`${options.folder}/${req.params.video_id}.json`,  { root : process.cwd()});
         });
 
 
         app.get('/videos', function (req, res) {
 
-            res.sendFile(`${options.folder}/videos.json`,  { root : __dirname});
+            res.sendFile(`${options.folder}/videos.json`,  { root : process.cwd()});
         });
 
         app.get('/file/v1/video/:video_id/filename/video%2Fvideo.mp4', function (req, res) {
 
-            res.sendFile(`${options.folder}/${req.params.video_id}.mp4`,  { root : __dirname});
+            res.sendFile(`${options.folder}/${req.params.video_id}.mp4`,  { root : process.cwd()});
 
         });
 
