@@ -45,7 +45,7 @@ module.exports = function (api_key) {
 
                     return then();
 
-                });
+                }, folder);
 
             } else {
 

@@ -4,7 +4,7 @@ const fs = require('fs-extra');
 
 module.exports = function (api_key) {
 
-    return function list(callback) {
+    return function list(callback, folder) {
 
         request({
             headers: {
@@ -16,8 +16,8 @@ module.exports = function (api_key) {
 
             if(err) {
 
-                if(err.code === 'ENOTFOUND' && process.env.VECTORLY_LOCAL_FOLDER && fs.existsSync(`${process.env.VECTORLY_LOCAL_FOLDER}/videos.json`)){
-                    return callback(null, fs.readJsonSync(`${process.env.VECTORLY_LOCAL_FOLDER}/videos.json`))
+                if(err.code === 'ENOTFOUND' && folder && fs.existsSync(`${folder}/videos.json`)){
+                    return callback(null, fs.readJsonSync(`${folder}/videos.json`))
                 } else return callback(err);
 
             } else{
@@ -28,9 +28,9 @@ module.exports = function (api_key) {
                 try{
                     videos = JSON.parse(body);
 
-                    if(process.env.VECTORLY_LOCAL_FOLDER) {
-                        fs.ensureDir(process.env.VECTORLY_LOCAL_FOLDER);
-                        fs.writeJsonSync(`${process.env.VECTORLY_LOCAL_FOLDER}/videos.json`, videos);
+                    if(folder) {
+                        fs.ensureDir(folder);
+                        fs.writeJsonSync(`${folder}/videos.json`, videos);
                     }
 
                     return callback(null, videos);
