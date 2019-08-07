@@ -24,9 +24,6 @@ module.exports = {
             next();
         });
 
-
-        console.log(__dirname);
-
         app.use('/embed', serveStatic(path.join(__dirname, 'embed')));
 
         app.get('/file/v1/video/:video_id/filename/vvid.json', function (req, res) {

@@ -98,7 +98,7 @@ To authorize an individual user to watch a specific video, you can create tempor
  ### Sync
  You can create a local store of your content using the sync command
  
-    vectorly sync --local-file=<folder_to_save_videos> --api-key=<api-key>
+    vectorly sync --local-folder=<folder_to_save_videos> --api-key=<api-key>
     
   This will proceed to download all of your videos, and meta data offline
   
@@ -107,7 +107,7 @@ To authorize an individual user to watch a specific video, you can create tempor
 
 You can also playback vectorly videos offline through the server. 
 
-    vectorly server --local-file=<folder_to_save_videos> --api-key=<api-key> --port 8080
+    vectorly server --local-folder=<folder_to_save_videos> --api-key=<api-key> --port 8080
 
 That will spin up a local server available offline to playback your videos. You can then access your videos using a similar api to iframe embed
 
