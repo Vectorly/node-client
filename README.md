@@ -48,6 +48,8 @@ You can get your API key in the "Settings page", which you can view by clicking 
 
 ## Listing files
 
+You can list the files in your library
+
     vectorly.list(function (err, videos) {
     
         if(err) return console.log("An error ocurred while  listing videos");
@@ -55,6 +57,20 @@ You can get your API key in the "Settings page", which you can view by clicking 
         console.log("Got videos");
         console.log(videos);
     });
+
+## Searching files
+Or you can search videos by name
+
+    vectorly.search('search term', function (err, videos) {
+    
+        if(err) return console.log("An error ocurred while  searching videos");
+    
+        console.log("Got videos");
+        console.log(videos);
+    });
+
+
+    
 
 
 ## Downloading files
