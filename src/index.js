@@ -43,7 +43,7 @@ program
 
         if(cmd === "sync") {
 
-            require('./sync')(api_key)({folder: 'files'}, function (err) {
+            require('./sync')(api_key)({folder: local_folder}, function (err) {
 
                 if(err) return console.log(err);
 
