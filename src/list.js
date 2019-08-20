@@ -9,7 +9,7 @@ module.exports = function (api_key) {
         request({
             headers: {
                 'x-api-key': api_key,
-                'Connection': 'keep-alive'
+                //'Connection': 'keep-alive'
             },
             uri: 'https://api.vectorly.io/videos/list',
             method: 'GET'
