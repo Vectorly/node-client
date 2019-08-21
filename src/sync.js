@@ -65,7 +65,7 @@ module.exports = function (api_key) {
             console.log("Gathering download meta data...");
 
 
-            async.each(video_list, function (video_id, next) {
+            async.eachLimit(video_list, 20, function (video_id, next) {
 
                 let download = request({
                     headers: {
