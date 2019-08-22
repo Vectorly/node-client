@@ -71,7 +71,7 @@ module.exports = function (api_key) {
             if(!options.silent) console.log("Gathering download meta data...");
 
 
-            async.eachLimit(video_list, 50, function (video_id, next) {
+            async.eachLimit(video_list, 10, function (video_id, next) {
 
                 let download = request({
                     headers: {
@@ -157,7 +157,7 @@ module.exports = function (api_key) {
 
             let manifest_files_downloaded = 0;
 
-            async.eachLimit(video_list, 20, function (video_id, next) {
+            async.eachLimit(video_list, 10, function (video_id, next) {
 
                 let destination = `${folder}/${video_id}.json`;
 
