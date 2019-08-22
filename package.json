@@ -1,6 +1,6 @@
 {
   "name": "@vectorly-io/client",
-  "version": "0.0.12",
+  "version": "0.0.14",
   "description": "Node library for uploading, compressing and streaming videos using Vectorly's stream product",
   "main": "index.js",
   "bin": {
