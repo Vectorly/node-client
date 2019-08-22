@@ -32,7 +32,7 @@ module.exports = function (api_key) {
 
             if (!options.videos) {
 
-                console.log("Fetching list of videos to sync ...");
+                if(!options.silent) console.log("Fetching list of videos to sync ...");
 
                 const list = require('./list')(api_key);
 
@@ -65,12 +65,13 @@ module.exports = function (api_key) {
         function getTotalToDownload(cb) {
 
             total_files_to_download = video_list.length;
+            let total_meta_data_to_fetch = 0;
 
-            console.log(`There are ${total_files_to_download} videos to download`);
-            console.log("Gathering download meta data...");
+            if(!options.silent)  console.log(`There are ${total_files_to_download} videos to download`);
+            if(!options.silent) console.log("Gathering download meta data...");
 
 
-            async.eachLimit(video_list, 20, function (video_id, next) {
+            async.eachLimit(video_list, 50, function (video_id, next) {
 
                 let download = request({
                     headers: {
@@ -82,7 +83,15 @@ module.exports = function (api_key) {
 
                 download.on('response', function (data) {
 
-                    let destination = `${folder}/${video_id}.mp4`;
+                    let destination = `${folder}/${videos_by_id[video_id].name.split('.')[0] || video_id}.mp4`;
+
+
+                    total_meta_data_to_fetch++;
+
+                    if(video_list.length > 500){
+                        if(!options.silent)  process.stdout.write(`Fetched meta data for ${total_meta_data_to_fetch} out for ${video_list.length} videos \r`);
+                    }
+
 
 
                     if (fs.existsSync(destination)) {
@@ -144,16 +153,13 @@ module.exports = function (api_key) {
 
         function fetchingManifests(cb) {
 
+            if(!options.silent) console.log(`Updating meta data for ${video_list.length} videos`);
 
-            console.log("\nUpdating meta data");
+            let manifest_files_downloaded = 0;
 
-            console.log("Videos to download");
-            console.log(videos_to_download.length);
+            async.eachLimit(video_list, 20, function (video_id, next) {
 
-            async.eachLimit(videos_to_download, 20, function (video_id, next) {
-
-                console.log("Getting video");
-                console.log(video_id);
+                let destination = `${folder}/${video_id}.json`;
 
                 let download = request({
                     headers: {
@@ -164,25 +170,25 @@ module.exports = function (api_key) {
                 });
 
 
-                console.log({
-                    headers: {
-                        'x-api-key': api_key
-                    },
-                    uri: `https://api.vectorly.io/videos/metadata/${video_id}`,
-                    method: 'GET'}
-                );
-
-                let destination = `${folder}/${video_id}.json`;
-
                 let dest = fs.createWriteStream(destination);
 
                 download.on('error', function (err) {
 
                     console.log("Error");
-                   console.log(err);
+                    console.log(err);
                 });
 
-                download.on('end', next);
+
+                download.on('end', function () {
+
+                    manifest_files_downloaded++;
+
+                    if(video_list.length > 500){
+                        if(!options.silent) process.stdout.write(`Fetched meta data for ${manifest_files_downloaded} out for ${video_list.length} videos \r`);
+                    }
+                    next();
+
+                });
 
                 download.pipe(dest);
 
@@ -196,12 +202,12 @@ module.exports = function (api_key) {
 
             if(total_bytes_to_download === 0){
 
-                console.log(`Local directory is already up do date`);
+                if(!options.silent)  console.log(`Local directory is already up do date`);
                 return cb();
             } else {
 
-                console.log(`${videos_skipped.length} videos already up to date`);
-                console.log(`There are ${filesize(total_bytes_to_download)} bytes of video to download`);
+                if(!options.silent)  console.log(`${videos_skipped.length} videos already up to date`);
+                if(!options.silent) console.log(`There are ${filesize(total_bytes_to_download)} bytes of video to download`);
             }
 
 
