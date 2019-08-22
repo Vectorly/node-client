@@ -22,6 +22,7 @@ module.exports = function (api_key) {
         let files_complete = 0;
         let total_files_to_download = 0;
         let bytes_downloaded = 0;
+        let videos_by_id = {};
 
 
         async.series([getVideoList, getTotalToDownload, downloadAll, fetchingManifests], callback);
@@ -42,6 +43,10 @@ module.exports = function (api_key) {
                     fs.writeJsonSync(`${folder}/videos.json`, videos);
 
                     video_list = videos.map(video => video.id);
+
+                    videos.forEach(function (video) {
+                       videos_by_id[video.id] = video;
+                    });
 
                     return then();
 
@@ -142,8 +147,13 @@ module.exports = function (api_key) {
 
             console.log("\nUpdating meta data");
 
+            console.log("Videos to download");
+            console.log(videos_to_download.length);
+
             async.eachLimit(videos_to_download, 20, function (video_id, next) {
 
+                console.log("Getting video");
+                console.log(video_id);
 
                 let download = request({
                     headers: {
@@ -154,9 +164,23 @@ module.exports = function (api_key) {
                 });
 
 
+                console.log({
+                    headers: {
+                        'x-api-key': api_key
+                    },
+                    uri: `https://api.vectorly.io/videos/metadata/${video_id}`,
+                    method: 'GET'}
+                );
+
                 let destination = `${folder}/${video_id}.json`;
 
                 let dest = fs.createWriteStream(destination);
+
+                download.on('error', function (err) {
+
+                    console.log("Error");
+                   console.log(err);
+                });
 
                 download.on('end', next);
 
@@ -192,7 +216,7 @@ module.exports = function (api_key) {
                 });
 
 
-                let destination = `${folder}/${video_id}.mp4`;
+                let destination = `${folder}/${videos_by_id[video_id].name.split('.')[0] || video_id}.mp4`;
 
                 let dest = fs.createWriteStream(destination);
 

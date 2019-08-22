@@ -1,0 +1,7 @@
+
+
+require('../src/local').server({port:'8080', folder: 'files'}, function (err) {
+
+    console.log("Server is live!");
+
+});

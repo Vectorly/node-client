@@ -39,7 +39,20 @@ module.exports = {
 
         app.get('/file/v1/video/:video_id/filename/video%2Fvideo.mp4', function (req, res) {
 
-            res.sendFile(`${options.folder}/${req.params.video_id}.mp4`,  { root : process.cwd()});
+
+            if(fs.pathExistsSync(`${options.folder}/${req.params.video_id}.mp4`)){
+                res.sendFile(`${options.folder}/${req.params.video_id}.mp4`,  { root : process.cwd()});
+            } else{
+
+                let videos = fs.readJsonSync(`${options.folder}/videos.json`);
+                let video_data = videos.find(function (video) {
+                    return video.id === req.params.video_id;
+                });
+
+                res.sendFile(`${options.folder}/${video_data.name.split('.')[0]}.mp4`,  { root : process.cwd()});
+            }
+
+
 
         });
 
