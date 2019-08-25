@@ -37,6 +37,25 @@ module.exports = {
             res.sendFile(`${options.folder}/videos.json`,  { root : process.cwd()});
         });
 
+        app.get('/search/:term', function (req, res) {
+
+            let videos = fs.readJsonSync(`${options.folder}/videos.json`);
+
+
+            let to_return = [];
+
+            let regex = new RegExp(req.params.term,"gi");
+
+            videos.forEach(function (video) {
+
+                if(video.name.match(regex)) to_return.push(video);
+            });
+
+            res.status(200).send(to_return);
+
+
+        });
+
         app.get('/file/v1/video/:video_id/filename/video%2Fvideo.mp4', function (req, res) {
 
 

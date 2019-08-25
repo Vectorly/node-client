@@ -32,6 +32,21 @@ module.exports = function (api_key) {
 
             if (!options.videos) {
 
+                if(fs.existsSync(`${folder}/videos.json`)){
+                    if(!options.silent) console.log("Loading local database");
+
+                    let videos = fs.readJsonSync(`${folder}/videos.json`);
+
+                    video_list = videos.map(video => video.id);
+
+                    videos.forEach(function (video) {
+                        videos_by_id[video.id] = video;
+                    });
+
+                    return then();
+
+                }
+
                 if(!options.silent) console.log("Fetching list of videos to sync ...");
 
                 const list = require('./list')(api_key);
@@ -65,89 +80,44 @@ module.exports = function (api_key) {
         function getTotalToDownload(cb) {
 
             total_files_to_download = video_list.length;
-            let total_meta_data_to_fetch = 0;
 
             if(!options.silent)  console.log(`There are ${total_files_to_download} videos to download`);
             if(!options.silent) console.log("Gathering download meta data...");
 
 
-            async.eachLimit(video_list, 10, function (video_id, next) {
+            let videos = fs.readJsonSync(`${folder}/videos.json`);
 
-                let download = request({
-                    headers: {
-                        'x-api-key': api_key
-                    },
-                    uri: `https://api.vectorly.io/videos/download/${video_id}`,
-                    method: 'HEAD'
-                });
+            videos.forEach(function (video) {
 
-                download.on('response', function (data) {
-
-                    let destination = `${folder}/${videos_by_id[video_id].name.split('.')[0] || video_id}.mp4`;
+                let destination = `${folder}/${videos_by_id[video.id].name.split('.')[0] || video.id}.mp4`;
 
 
-                    total_meta_data_to_fetch++;
+                if (!fs.existsSync(destination)) {
 
-                    if(video_list.length > 500){
-                        if(!options.silent)  process.stdout.write(`Fetched meta data for ${total_meta_data_to_fetch} out for ${video_list.length} videos \r`);
+                    videos_to_download.push(video.id);
+                    total_bytes_to_download += video.size;
+
+                } else{
+
+                    let local_file = fs.statSync(destination);
+
+
+                    if(local_file.size < video.size *0.8 || local_file.size > video.size*1.2){
+
+                        videos_to_download.push(video.id);
+                        total_bytes_to_download += video.size;
+
+                    } else{
+
+                        videos_skipped.push(video.id);
+                        files_complete++;
                     }
 
+                }
 
+            });
 
-                    if (fs.existsSync(destination)) {
-
-
-                        let local_file = fs.statSync(destination);
-
-
-                        let locally_modified = new Date(local_file.mtime);
-                        let server_modified = new Date(data.headers['last-modified']);
-
-
-                        if(local_file.size  < Number(data.headers['content-length'] )){
-
-                            videos_to_download.push(video_id);
-                            total_bytes_to_download += Number(data.headers['content-length']);
-                            return next();
-
-                        } else if(locally_modified > server_modified){
-
-                            videos_skipped.push(video_id);
-                            files_complete+=1;
-                            return next();
-
-                        } else{
-                           // console.log("Fetcing latest from server");
-                            videos_to_download.push(video_id);
-                            total_bytes_to_download += Number(data.headers['content-length']);
-                            return next();
-                        }
-
-
-
-
-                    } else {
-                        videos_to_download.push(video_id);
-                        total_bytes_to_download += Number(data.headers['content-length']);
-                        return next();
-                    }
-
-
-
-
-
-                });
-
-
-                download.on('error', function (err) {
-
-                    if(err.code === 'ENOTFOUND') return  next("Cannot sync right now, not connected to the internet");
-                    else return next(err);
-
-                });
-
-
-            }, cb);
+            return cb();
 
         }
 
