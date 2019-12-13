@@ -90,6 +90,33 @@ Or you can search videos by name
     });
 
 
+## Updating files
+
+
+    vectorly.updates(options, function (err, updates) {
+
+        if(err) return console.log("An error ocurred while listing videos");
+
+            // updates.new_videos
+            // updates.videos_to_update
+            // updates.videos_up_to_date
+
+    });
+
+
+## Sync
+
+
+    vectorly.sync(options, function (err) {
+
+        if(err) return console.log("An error ocurred while syncing with the server");
+
+    });
+
+
+
+
+
 ## Security
 
 To authorize an individual user to watch a specific video, you can create temporary, unique signed URLs, that will enable the video to only be viewed for a short amount of time.

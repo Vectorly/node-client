@@ -16,7 +16,8 @@ module.exports = function (api_key) {
             list: require('./list')(api_key),
             sync: require('./sync')(api_key),
             search: require('./search')(api_key),
-            local: require('./local')
+            local: require('./local'),
+            updates: require('./update')(api_key)
         };
 
     })();
